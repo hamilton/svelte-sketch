@@ -9,26 +9,33 @@ export default app;
 `
 
 
-export const indexHTML = `
-<!DOCTYPE html>
+export const indexHTML = ({css, title}) => {
+	const defaultArguments = {css: undefined, title: "Svignette"};
+	const combinedArguments = {...defaultArguments, css, title};
+	let stylesheet;
+	if (defaultArguments.css) {
+		stylesheet = `<link rel='stylesheet' href='/${css}'></link>`
+	} else {
+		stylesheet = `<link rel='stylesheet' href='/global.css'>`
+	}
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
-	<title>Svelte app</title>
+	<title>${combinedArguments.title}</title>
 
-	<link rel='icon' type='image/png' href='/favicon.png'>
-	<link rel='stylesheet' href='/global.css'>
-	<link rel='stylesheet' href='/build/bundle.css'>
+	<link rel='icon'e type='image/png' href='/favicon.png'>
+	${stylesheet}
 
-	<script defer src='/build/bundle.js'></script>
+	<script type="module" src='/dist/_entry.js'></script>
 </head>
 
 <body>
 </body>
 </html>
-`
+`};
 
 export const globalCSS = `
 html, body {
