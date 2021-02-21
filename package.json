@@ -2,9 +2,9 @@
   "name": "protosvelte",
   "version": "1.0.0",
   "description": "",
-  "main": "index.mjs",
+  "main": "index.js",
   "bin": {
-    "protosvelte": "./index.mjs"
+    "protosvelte": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
