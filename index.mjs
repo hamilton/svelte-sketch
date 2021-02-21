@@ -8,6 +8,9 @@ import snowpack from 'snowpack';
 import rimraf from "rimraf";
 import { mainJS, indexHTML, globalCSS } from "./assets.mjs";
 
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { createConfiguration, startServer } = snowpack;
 
 const args = yargs(helpers.hideBin(process.argv));
@@ -38,19 +41,19 @@ const fullPath = path.resolve(ENTRY);
 const componentName = getFilename(ENTRY);
 const rootDir = getDirectory(fullPath);
 
+const siteDir = `${__dirname}/_site`;
 
-
-makeDir('_site');
-makeDir('_site/bundle');
+makeDir(siteDir);
+makeDir(`${siteDir}/bundle`);
 // get css files and put them into site.
 const cssFile = args.argv.css;
 if (cssFile) {
     const fileContents = fs.readFileSync(path.resolve(cssFile)).toString();
-    createFile(`_site/${getFilename(cssFile)}`, fileContents);
+    createFile(`${siteDir}/${getFilename(cssFile)}`, fileContents);
 } else {
-    createFile('_site/global.css', globalCSS);
+    createFile(`${siteDir}/global.css`, globalCSS);
 }
-createFile('_site/index.html', indexHTML({
+createFile(`${siteDir}/index.html`, indexHTML({
     css: cssFile ? getFilename(cssFile) : undefined,
     title: componentName
 }));
@@ -61,7 +64,7 @@ function createMount() {
     // get all css files and place them in site.
     const mountPoint = {
         [rootDir]: "/dist",
-        _site: "/"
+        [siteDir]: "/"
     };
     return mountPoint;
 }
@@ -72,14 +75,14 @@ const config = createConfiguration({
     plugins: [
         '@snowpack/plugin-svelte'
     ],
-    "packageOptions": {
+    packageOptions: {
         "source": "remote"
-      }
+    },
+    root: __dirname
 });
 
 const server = await startServer({config});
-const {contents} = server.loadUrl('/dist/_entry.js');
-console.log(contents);
+server.loadUrl('/dist/_entry.js');
 
 function bye() {
     rimraf.sync("_site");
