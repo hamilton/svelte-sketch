@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.mjs",
   "bin": {
-    "protosvelte": "./index.mjs"
+    "protosvelte": "./cli.mjs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
   "devDependencies": {
     "@snowpack/plugin-svelte": "^3.5.2",
     "rimraf": "^3.0.2",
-    "snowpack": "^3.0.11",
+    "snowpack": "^3.8.0",
     "svelte": "^3.32.3",
     "sirv-cli": "^1.0.11",
     "yargs": "^16.2.0"

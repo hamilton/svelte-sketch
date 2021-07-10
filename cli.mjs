@@ -14,19 +14,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { createConfiguration, startServer, build } = snowpack;
 
 const args = yargs(helpers.hideBin(process.argv))
-    .command('watch <component>', 'watch component and serve on 8080', {
-        component: {
-            type: 'string'
-        }
-    })
-    .command('build <component>', 'build final component', {
+    .command('watch <component>', 'watch component for changes and serve on 8080', {
         component: {
             type: 'string'
         }
     })
     .example('$0 watch ./C.svelte', 'watch ExampleComponent.svelte')
     .example('$0 watch ./C.svelte --css style.css', 'add local style.css & watch')
-    .wrap(90)
     .array("css")
     .option("css <stylesheets>", {type: "array", describe: "path(s) to global stylesheets to append to entrypoint"})
     .help();
@@ -116,22 +110,11 @@ if (mode === 'watch' || mode === 'build') {
         ],
         packageOptions: {
             "source": "remote",
-            // cache: `${__dirname}/.snowpack`,
-            
-        },
-        buildOptions: {
-            metaUrlPath: `${__dirname}/.snowpack`
         },
         root: __dirname,
     });
     if (mode === 'watch') {
         const server = await startServer({config});
-        await server.loadUrl('/dist/_entry.js');
-    } else if (mode === 'build') {
-        const server = await startServer({config});
-        await server.loadUrl('/dist/_entry.js');
-        const {result} = await build({config});
-        console.log(result);
     }
 }
 
