@@ -188,6 +188,7 @@ export async function cli(argv) {
         createFile(`${siteDir}/favicon.svg`, favicon);
 
         const config = createConfiguration({
+            mode: "development",
             mount: createMount(rootDir, siteDir),
             exclude: ['**/node_modules/**/*', "rollup.config.js"],
             plugins: [
@@ -199,7 +200,8 @@ export async function cli(argv) {
             },
             devOptions: { 
                 port: 8042,
-                hmrPort: 8042
+                hmrPort: 8042,
+                hmr: true
              },
             root: __dirname,
         });
@@ -207,6 +209,7 @@ export async function cli(argv) {
         if (mode === 'watch') {
             open('http://localhost:8042');
             const server = await startServer({config});
+            console.log('serve is active');
             //server.onFileChange()
         }
     }
