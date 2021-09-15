@@ -2,7 +2,7 @@
   "name": "@hamilton/protosvelte",
   "version": "0.1.0",
   "description": "",
-  "main": "cli.js",
+  "main": "src/cli.js",
   "bin": {
     "protosvelte": "bin/protosvelte",
     "@hamilton/protosvelte": "bin/protosvelte"

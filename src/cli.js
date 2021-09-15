@@ -8,7 +8,7 @@ import * as snowpack from 'snowpack';
 import tmp from "tmp";
 import open from "open";
 import { bold, gray, green } from 'kleur';
-const metadata = require('./package.json');
+const metadata = require('../package.json');
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets.mjs";
 
 import { fileURLToPath } from 'url';
@@ -205,12 +205,10 @@ export async function cli(argv) {
              },
             root: __dirname,
         });
-        console.log(config);
+        
         if (mode === 'watch') {
             open('http://localhost:8042');
-            const server = await startServer({config});
-            console.log('serve is active');
-            //server.onFileChange()
+            await startServer({config});
         }
     }
 
