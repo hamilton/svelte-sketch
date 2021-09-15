@@ -1,4 +1,4 @@
-export const mainJS = (file) => `
+export const mainJS = (file:string) => `
 import App from '${file}';
 
 const app = new App({
@@ -14,8 +14,12 @@ if (import.meta.hot) {
 	});
 }`
 
+interface htmlArguments {
+	css: string | undefined,
+	title: string
+}
 
-export const indexHTML = ({css, title}) => {
+export const indexHTML = ({css, title} : htmlArguments) => {
 	const defaultArguments = {css: undefined, title: "Svignette"};
 	const combinedArguments = {...defaultArguments, css, title};
 	let stylesheet;

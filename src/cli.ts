@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
+// @ts-ignore
 import yargs from "yargs";
+// @ts-ignore
 import * as helpers from "yargs/helpers";
 import path from "path";
 import fs from "fs";
@@ -8,64 +10,13 @@ import * as snowpack from 'snowpack';
 import tmp from "tmp";
 import open from "open";
 import { bold, gray, green } from 'kleur';
-const metadata = require('../package.json');
-import { mainJS, indexHTML, globalCSS, favicon } from "./assets.mjs";
 import { fileURLToPath } from 'url';
-const _titleLength = 99;
 
-function shuffle(str) {
-    let a = str.split("");
-    let n =  a.length;
+import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
+import fancyHeader from "./fancy-header"
 
-    for(let i = n - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        let tmp = a[i];
-        a[i] = a[j];
-        a[j] = tmp;
-    }
-    return a.join("");
-}
 
-function space(str) {
-    const spacer =  Array.from({length: ~~(Math.abs(_titleLength - str.length) / 2)}).fill(' ').join('');
-    return `${spacer}${str}${spacer}`;
-}
-
-function repeat(str) {
-    return Array.from({length: ~~((_titleLength + str.length) / (str.length))}).fill(str).join('').slice(0,_titleLength + 1);
-}
-
-//const CHAR = '◉ ◍ ◳ ◲ ◱ ◰ ◴ ◵ ◶ ◷ ◧ ◩ ◪ ◨ ◫ ◎ ● ';
-const CHAR = '◳◲◱◰';
-const UPPER = CHAR.split('').reverse().join("").trim();//shuffle(CHAR);
-//const THIRD = '◴◵◶◷'
-const THIRD = Math.random() > .5 ? 
-    '▲△▴▵▶▷▸⍟▹►▻▼▽▾▿◀◁◂◃◄◅◸◹◺◿▮▭▬▯▰▱◍◭◮◦◊◈▢◎◕◔◓◒◑◐⇶' :
-    '▁▂▃▄▅▆▇█';
-//const THIRD = '▁▂▃▄▅▆▇█'
-//const THIRD = '⏧'
-//const THIRD = '▁▂▃▄▅▆▇█';
-//const THIRD = '▖▗▘▙▚▛▜▝▞▟'
-const FIRST = CHAR.slice(0,1);
-const titleText = "SKIT";
-
-console.clear();
-console.log();
-console.log();
-console.log();
-console.log(gray(shuffle(repeat(THIRD))));
-console.log(bold(repeat(UPPER)));
-console.log();
-
-console.log(space(`${titleText} ${metadata.version}`));
-console.log();
-
-console.log(bold(repeat(CHAR)));
-console.log(gray(shuffle(repeat(THIRD))));
-console.log();
-console.log();
-
-function createMount(root, site) {
+function createMount(root:string, site:string) {
     // get all css files and place them in site.
     const mountPoint = {
         [root]: "/dist",
@@ -74,7 +25,8 @@ function createMount(root, site) {
     return mountPoint;
 }
 
-export async function cli(argv) {
+export async function cli(argv:object) {
+    // @ts-ignore
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const { createConfiguration, startServer, build } = snowpack;
 
@@ -109,11 +61,13 @@ export async function cli(argv) {
         process.exit();
     }
 
-    function getDirectory(file) {
+    fancyHeader();
+
+    function getDirectory(file:string) {
         return file.split('/').slice(0, -1).join('/');
     }
 
-    function getFilename(file) {
+    function getFilename(file:string) {
         return file.split('/').slice(-1)[0];
     }
 
@@ -121,7 +75,7 @@ export async function cli(argv) {
         return tmp.dirSync({ mode: 0o777, prefix: 'protosvelte', unsafeCleanup: true });
     }
 
-    function createFile(path, content) {
+    function createFile(path:string, content:string) {
         fs.writeFileSync(path, content);
     }
 
@@ -143,7 +97,7 @@ export async function cli(argv) {
     if (args.argv.css) {
         const _cssPath = path.resolve(args.argv.css[0]).split("/");
         const _cssTo = _cssPath.slice(0, -1).join('/');
-        const _cssF = _cssPath.slice(-1);
+        const _cssF = _cssPath.slice(-1)[0];
         console.log(
             gray(" ◴ ◵ ◶ ◷ "),
 
@@ -192,6 +146,7 @@ export async function cli(argv) {
             mode: mode === "watch" ? "development" : "production",
             mount: createMount(rootDir, siteDir),
             exclude: ['**/node_modules/**/*', "rollup.config.js"],
+            // @ts-ignore
             plugins,
             packageOptions: {
                 "source": "remote",
@@ -224,6 +179,9 @@ export async function cli(argv) {
                 - output would be a _build directory that had
                 - index.html, global.css, any other stylesheets, and a build dir
                     - build would contain the final javascript thing.
+                If I could get a list of remote dependencies and just, I don't know,
+                npm install them, then I'm good I think. We could make a whole
+                npm project.
             */
            //throw new Error("Building is not quite supported yet. Check back in a future release.")
            console.log("Building is not quite supported yet. Check back in a future release.")
