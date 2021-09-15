@@ -10,9 +10,7 @@ import open from "open";
 import { bold, gray, green } from 'kleur';
 const metadata = require('../package.json');
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets.mjs";
-
 import { fileURLToPath } from 'url';
-
 const _titleLength = 99;
 
 function shuffle(str) {
@@ -37,7 +35,6 @@ function repeat(str) {
     return Array.from({length: ~~((_titleLength + str.length) / (str.length))}).fill(str).join('').slice(0,_titleLength + 1);
 }
 
-
 //const CHAR = '◉ ◍ ◳ ◲ ◱ ◰ ◴ ◵ ◶ ◷ ◧ ◩ ◪ ◨ ◫ ◎ ● ';
 const CHAR = '◳◲◱◰';
 const UPPER = CHAR.split('').reverse().join("").trim();//shuffle(CHAR);
@@ -50,7 +47,7 @@ const THIRD = Math.random() > .5 ?
 //const THIRD = '▁▂▃▄▅▆▇█';
 //const THIRD = '▖▗▘▙▚▛▜▝▞▟'
 const FIRST = CHAR.slice(0,1);
-const titleText = "PROTOSVELTE";
+const titleText = "SKIT";
 
 console.clear();
 console.log();
@@ -81,12 +78,13 @@ export async function cli(argv) {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const { createConfiguration, startServer, build } = snowpack;
 
-    const args = yargs(helpers.hideBin(process.argv))
+    const args = yargs(helpers.hideBin(argv))
         .command('watch <component>', 'watch component for changes and serve on 8080', {
             component: {
                 type: 'string'
             }
         })
+        .command('build <component>', 'build component')
         .example('$0 watch ./C.svelte', 'watch ExampleComponent.svelte')
         .example('$0 watch ./C.svelte --css style.css', 'add local style.css & watch')
         .array("css")
@@ -101,8 +99,8 @@ export async function cli(argv) {
         process.exit();
     }
 
-    if (mode === 'watch' && mode === 'compile') {
-        console.error("must choose only one: watch or compile");
+    if (mode === 'watch' && mode === 'build') {
+        console.error("must choose only one: watch or build");
         process.exit();
     }
 
@@ -163,7 +161,6 @@ export async function cli(argv) {
     console.log();
     console.log();
     console.log();
-    //const siteDir = `${__dirname}/_site`;
 
     // make the entry one way for both watch and compile modes.
     createFile(`${rootDir}/_entry.js`, mainJS(ENTRY));
@@ -187,13 +184,15 @@ export async function cli(argv) {
 
         createFile(`${siteDir}/favicon.svg`, favicon);
 
+        const plugins = [['@snowpack/plugin-svelte']];
+        if (mode === 'build') {
+            plugins.push(['@snowpack/plugin-webpack']);
+        }
         const config = createConfiguration({
-            mode: "development",
+            mode: mode === "watch" ? "development" : "production",
             mount: createMount(rootDir, siteDir),
             exclude: ['**/node_modules/**/*', "rollup.config.js"],
-            plugins: [
-                ['@snowpack/plugin-svelte']
-            ],
+            plugins,
             packageOptions: {
                 "source": "remote",
                 "cache": `${siteDir}`
@@ -201,14 +200,35 @@ export async function cli(argv) {
             devOptions: { 
                 port: 8042,
                 hmrPort: 8042,
-                hmr: true
+                hmr: true,
+             },
+             buildOptions:{
+                out: `${rootDir}/_build/`
+             },
+             optimize: {
+                 bundle: true
              },
             root: __dirname,
         });
         
         if (mode === 'watch') {
             open('http://localhost:8042');
-            await startServer({config});
+            const server = await startServer({config});
+            const pkgUrl = await server.getUrlForPackage('svelte');
+            console.log(pkgUrl);
+        } else if (mode === 'build') {
+            /* 
+                What would building look like?
+                I'm actually not 100% sure, but I think it would probably look like this:
+                - entry would be the _entry.js file.
+                - output would be a _build directory that had
+                - index.html, global.css, any other stylesheets, and a build dir
+                    - build would contain the final javascript thing.
+            */
+           //throw new Error("Building is not quite supported yet. Check back in a future release.")
+           console.log("Building is not quite supported yet. Check back in a future release.")
+           console.log();
+            //await build({ config });
         }
     }
 
