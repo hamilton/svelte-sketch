@@ -9,7 +9,7 @@ import fs from "fs";
 // 	ssr: {}
 // };
 
-export let packagesUrl = "https://cdn.skypack.dev/";
+export let packagesUrl = "https://unpkg.com";
 export let svelteUrl = `${packagesUrl}/svelte`;
 let current_id = 0;
 
@@ -130,11 +130,6 @@ export default function plugin() {
 			}
 
 			else {
-				// console.log("fetching from unpkg", importee, importer);
-				// if importee has 
-				// fetch from unpkg
-				//self.postMessage({ type: 'status', uid, message: `resolving ${importee}` });
-
 				if (importer in lookup) {
 					// console.log('importer in lookup.');
 					const match = /^(@[^/]+\/)?[^/]+/.exec(importee);
@@ -145,6 +140,8 @@ export default function plugin() {
 					const pkg_url = await follow_redirects(`${packagesUrl}/${importee}/package.json`);
 					const pkg_json = (await fetch_if_uncached(pkg_url)).body;
 					const pkg = JSON.parse(pkg_json);
+
+					console.log(pkg);
 
 					if (pkg.svelte || pkg.module || pkg.main) {
 						const url = pkg_url.replace(/\/package\.json$/, '');
@@ -164,7 +161,6 @@ export default function plugin() {
 				//self.postMessage({ type: 'status', uid, message: `fetching ${resolved}` });
 			}
 			const res = await fetch_if_uncached(resolved);
-			console.log(res.body)
 			return res.body;
 		},
 	}
