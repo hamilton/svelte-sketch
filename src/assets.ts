@@ -5,14 +5,7 @@ const app = new App({
 	target: document.body,
 });
 
-export default app;
-if (import.meta.hot) {
-	console.log('does this work');
-	import.meta.hot.accept();
-	import.meta.hot.dispose(() => {
-		app.$destroy();
-	});
-}`
+export default app;`
 
 interface htmlArguments {
 	css: string | undefined,
@@ -39,7 +32,7 @@ export const indexHTML = ({css, title} : htmlArguments) => {
 	<link rel='icon' type="image/svg+xml" href='/favicon.svg'>
 	${stylesheet}
 
-	<script type="module" src='/dist/_entry.js'></script>
+	<script type="module" src='/_entry.js'></script>
 </head>
 
 <body>

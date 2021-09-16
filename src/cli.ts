@@ -10,10 +10,16 @@ import * as snowpack from 'snowpack';
 import tmp from "tmp";
 import open from "open";
 import { bold, gray, green } from 'kleur';
+
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+// @ts-ignore
+import resolveRemoteDependencies from "./plugin";
+
 import { fileURLToPath } from 'url';
+import { createServer } from "vite";
 
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
-import fancyHeader from "./fancy-header"
+import fancyHeader from "./fancy-header";
 
 
 function createMount(root:string, site:string) {
@@ -84,6 +90,7 @@ export async function cli(argv:object) {
     const rootDir = getDirectory(fullPath);
     const tempDir = setupTemporaryDir();
     const siteDir = tempDir.name;
+    fs.mkdirSync(`${siteDir}/public`);
 
     console.log();
     console.log(
@@ -100,7 +107,6 @@ export async function cli(argv:object) {
         const _cssF = _cssPath.slice(-1)[0];
         console.log(
             gray(" ◴ ◵ ◶ ◷ "),
-
             'stylesheet',
             bold().underline().green(_cssF),
             'from',
@@ -116,8 +122,10 @@ export async function cli(argv:object) {
     console.log();
     console.log();
 
+    console.log(ENTRY)
     // make the entry one way for both watch and compile modes.
-    createFile(`${rootDir}/_entry.js`, mainJS(ENTRY));
+    //createFile(`${siteDir}/public/_entry.js`, mainJS(ENTRY));
+    createFile(`${siteDir}/public/_entry.js`, mainJS(`${rootDir}/${ENTRY}`));
 
     if (mode === 'watch' || mode === 'build') {
         let cssFile;
@@ -127,50 +135,74 @@ export async function cli(argv:object) {
 
         if (cssFile) {
             const fileContents = fs.readFileSync(path.resolve(cssFile)).toString();
-            createFile(`${siteDir}/${getFilename(cssFile)}`, fileContents);
+            createFile(`${siteDir}/public/${getFilename(cssFile)}`, fileContents);
         } else {
-            createFile(`${siteDir}/global.css`, globalCSS);
+            createFile(`${siteDir}/public/global.css`, globalCSS);
         }
         createFile(`${siteDir}/index.html`, indexHTML({
             css: cssFile ? getFilename(cssFile) : undefined,
             title: componentName
         }));
 
-        createFile(`${siteDir}/favicon.svg`, favicon);
+        createFile(`${siteDir}/public/favicon.svg`, favicon);
 
-        const plugins = [['@snowpack/plugin-svelte']];
-        if (mode === 'build') {
-            plugins.push(['@snowpack/plugin-webpack']);
-        }
-        const config = createConfiguration({
-            mode: mode === "watch" ? "development" : "production",
-            mount: createMount(rootDir, siteDir),
-            exclude: ['**/node_modules/**/*', "rollup.config.js"],
-            // @ts-ignore
+        /**
+         * Create the configuration file.
+        */
+
+
+        const plugins = [resolveRemoteDependencies(), svelte()];
+
+        // const plugins = [['@snowpack/plugin-svelte']];
+        // if (mode === 'build') {
+        //     plugins.push(['@snowpack/plugin-webpack']);
+        // }
+
+
+        // const config = createConfiguration({
+        //     mode: mode === "watch" ? "development" : "production",
+        //     mount: createMount(rootDir, siteDir),
+        //     exclude: ['**/node_modules/**/*', "rollup.config.js"],
+        //     // @ts-ignore
+        //     plugins,
+        //     packageOptions: {
+        //         "source": "remote",
+        //         "cache": `${siteDir}`
+        //     },
+        //     devOptions: { 
+        //         port: 8042,
+        //         hmrPort: 8042,
+        //         hmr: true,
+        //      },
+        //      buildOptions:{
+        //         out: `${rootDir}/_build/`
+        //      },
+        //      optimize: {
+        //          bundle: true
+        //      },
+        //     root: __dirname,
+        // });
+        
+        const config = {
+            mode: "development",
+            root: siteDir,
             plugins,
-            packageOptions: {
-                "source": "remote",
-                "cache": `${siteDir}`
-            },
-            devOptions: { 
-                port: 8042,
-                hmrPort: 8042,
-                hmr: true,
-             },
-             buildOptions:{
-                out: `${rootDir}/_build/`
-             },
-             optimize: {
-                 bundle: true
-             },
-            root: __dirname,
-        });
+            publicDir: `${siteDir}/public/`,
+            server: {
+                port: 8042
+            }
+        };
+
+        console.log(
+            gray(' ◭ ◬ △ ◮ '),
+            `Project Root`,
+            green(config.root)
+        );
         
         if (mode === 'watch') {
-            open('http://localhost:8042');
-            const server = await startServer({config});
-            const pkgUrl = await server.getUrlForPackage('svelte');
-            console.log(pkgUrl);
+            //open('http://localhost:8042');
+            const server = await createServer({ configFile: false, ...config });
+            await server.listen();
         } else if (mode === 'build') {
             /* 
                 What would building look like?
