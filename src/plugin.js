@@ -9,7 +9,7 @@ import fs from "fs";
 // 	ssr: {}
 // };
 
-export let packagesUrl = "https://cdn.skypack.dev/";//'https://unpkg.com';
+export let packagesUrl = "https://cdn.skypack.dev/";
 export let svelteUrl = `${packagesUrl}/svelte`;
 let current_id = 0;
 
@@ -80,12 +80,15 @@ const lookup = {};
 export default function plugin() {
 	return {
 		name: "skit-plugin",
-		async resolveId(importee, importer, others) {
-			console.log('-------------------------------')
-			console.log(importee, importer, others);
+		async resolveId(importee, importer) {
 
+			// const resolution = await this.resolve(source, undefined, { skipSelf: true });
+			// // If it cannot be resolved, return `null` so that Rollup displays an error
+			// if (!resolution) return null;
+			// return `${resolution.id}?entry-proxy`;
+
+			// what am I supposed to do here, exactly?
 			if (importee.includes('client.mjs.mjs')) {
-				console.log('														hitting snag')
 				return `${importee.slice(0, -4)}`;
 			}
 			//if (uid !== current_id) throw ABORT;
@@ -150,20 +153,18 @@ export default function plugin() {
 				} catch (err) {
 					// ignore
 				}
-				console.log('~~~~~~~~~~~')
+
 				return await follow_redirects(`${packagesUrl}/${importee}`);
 			}
 		},
 		async load(resolved) {
-			//if (uid !== current_id) throw ABORT;
-
 			if (resolved in lookup) return lookup[resolved].source;
 
 			if (!fetch_cache.has(resolved)) {
 				//self.postMessage({ type: 'status', uid, message: `fetching ${resolved}` });
 			}
-			// console.log("					loading", resolved);
 			const res = await fetch_if_uncached(resolved);
+			console.log(res.body)
 			return res.body;
 		},
 	}
