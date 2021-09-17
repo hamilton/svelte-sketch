@@ -6,7 +6,6 @@ import yargs from "yargs";
 import * as helpers from "yargs/helpers";
 import path from "path";
 import fs from "fs";
-import * as snowpack from 'snowpack';
 import tmp from "tmp";
 import open from "open";
 import { bold, gray, green } from 'kleur';
@@ -14,8 +13,6 @@ import { bold, gray, green } from 'kleur';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 // @ts-ignore
 import cdn from './plugin-cdn';
-// @ts-ignore
-import resolveRemoteDependencies from "./plugin";
 
 import { fileURLToPath } from 'url';
 import { createServer } from "vite";
@@ -23,20 +20,9 @@ import { createServer } from "vite";
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
 import fancyHeader from "./fancy-header";
 
-
-function createMount(root:string, site:string) {
-    // get all css files and place them in site.
-    const mountPoint = {
-        [root]: "/dist",
-        [site]: "/"
-    };
-    return mountPoint;
-}
-
 export async function cli(argv:object) {
     // @ts-ignore
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const { createConfiguration, startServer, build } = snowpack;
 
     const args = yargs(helpers.hideBin(argv))
         .command('watch <component>', 'watch component for changes and serve on 8080', {
@@ -90,11 +76,11 @@ export async function cli(argv:object) {
     const fullPath = path.resolve(ENTRY);
     const componentName = getFilename(ENTRY);
     const rootDir = getDirectory(fullPath);
-    const tempDir = setupTemporaryDir();
-    const siteDir = tempDir.name;
-    fs.mkdirSync(`${siteDir}/public`);
+    const tempDirObj = setupTemporaryDir();
+    const tempDir = tempDirObj.name;
+    fs.mkdirSync(`${tempDir}/public`);
 
-    const outOfRootToMainComponent = path.relative(tempDir.name, rootDir);
+    const outOfRootToMainComponent = path.relative(tempDir, rootDir);
 
     console.log();
     console.log(
@@ -120,21 +106,13 @@ export async function cli(argv:object) {
     console.log(
         gray(' ◭ ◬ △ ◮ '),
         `Server root for repl`,
-        green(tempDir.name)
+        green(tempDir)
     );
     console.log();
     console.log();
     console.log();
     
-    
-
-    console.log(ENTRY)
-    // make the entry one way for both watch and compile modes.
-    //createFile(`${siteDir}/public/_entry.js`, mainJS(ENTRY));
-    console.log(`${rootDir}/${ENTRY}`);
-    //createFile(`${siteDir}/public/_entry.js`, mainJS(`${rootDir}/${ENTRY}`));
-    console.log(outOfRootToMainComponent);
-    createFile(`${siteDir}/public/_entry.js`, mainJS(`./${outOfRootToMainComponent}/${componentName}`));
+    createFile(`${tempDir}/public/_entry.js`, mainJS(`${rootDir}/${componentName}`));
 
     if (mode === 'watch' || mode === 'build') {
         let cssFile;
@@ -144,70 +122,27 @@ export async function cli(argv:object) {
 
         if (cssFile) {
             const fileContents = fs.readFileSync(path.resolve(cssFile)).toString();
-            createFile(`${siteDir}/public/${getFilename(cssFile)}`, fileContents);
+            createFile(`${tempDir}/public/${getFilename(cssFile)}`, fileContents);
         } else {
-            createFile(`${siteDir}/public/global.css`, globalCSS);
+            createFile(`${tempDir}/public/global.css`, globalCSS);
         }
-        createFile(`${siteDir}/index.html`, indexHTML({
+        createFile(`${tempDir}/index.html`, indexHTML({
             css: cssFile ? getFilename(cssFile) : undefined,
             title: componentName
         }));
 
-        createFile(`${siteDir}/public/favicon.svg`, favicon);
+        createFile(`${tempDir}/public/favicon.svg`, favicon);
 
-        /**
-         * Create the configuration file.
-        */
-
-
-        //const plugins = [resolveRemoteDependencies(), svelte()];
         const plugins = [svelte(), cdn("skypack")];
-
-        // const plugins = [['@snowpack/plugin-svelte']];
-        // if (mode === 'build') {
-        //     plugins.push(['@snowpack/plugin-webpack']);
-        // }
-
-
-        // const config = createConfiguration({
-        //     mode: mode === "watch" ? "development" : "production",
-        //     mount: createMount(rootDir, siteDir),
-        //     exclude: ['**/node_modules/**/*', "rollup.config.js"],
-        //     // @ts-ignore
-        //     plugins,
-        //     packageOptions: {
-        //         "source": "remote",
-        //         "cache": `${siteDir}`
-        //     },
-        //     devOptions: { 
-        //         port: 8042,
-        //         hmrPort: 8042,
-        //         hmr: true,
-        //      },
-        //      buildOptions:{
-        //         out: `${rootDir}/_build/`
-        //      },
-        //      optimize: {
-        //          bundle: true
-        //      },
-        //     root: __dirname,
-        // });
-        
-        console.log(ENTRY);
         
         const config = {
             mode: "development",
-            root: siteDir,
+            root: tempDir,
             plugins,
-            publicDir: `${siteDir}/public/`,
+            publicDir: `${tempDir}/public/`,
             server: {
                 port: 8042
             },
-            // resolve: {
-            //     alias: {
-            //         [`./mount/${ENTRY}`]: `/${ENTRY}`//`${rootDir}/`: '/'
-            //     }
-            // }
         };
 
         console.log(
@@ -222,18 +157,6 @@ export async function cli(argv:object) {
             const server = await createServer({ configFile: false, ...config });
             await server.listen();
         } else if (mode === 'build') {
-            /* 
-                What would building look like?
-                I'm actually not 100% sure, but I think it would probably look like this:
-                - entry would be the _entry.js file.
-                - output would be a _build directory that had
-                - index.html, global.css, any other stylesheets, and a build dir
-                    - build would contain the final javascript thing.
-                If I could get a list of remote dependencies and just, I don't know,
-                npm install them, then I'm good I think. We could make a whole
-                npm project.
-            */
-           //throw new Error("Building is not quite supported yet. Check back in a future release.")
            console.log("Building is not quite supported yet. Check back in a future release.")
            console.log();
             //await build({ config });
@@ -242,7 +165,7 @@ export async function cli(argv:object) {
 
     function byebye() {
         fs.unlinkSync(`${rootDir}/_entry.js`);
-        tempDir.removeCallback();
+        tempDirObj.removeCallback();
         process.exit();
     }
 
