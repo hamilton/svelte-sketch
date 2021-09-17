@@ -13,6 +13,8 @@ import { bold, gray, green } from 'kleur';
 
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 // @ts-ignore
+import cdn from './plugin-cdn';
+// @ts-ignore
 import resolveRemoteDependencies from "./plugin";
 
 import { fileURLToPath } from 'url';
@@ -92,6 +94,8 @@ export async function cli(argv:object) {
     const siteDir = tempDir.name;
     fs.mkdirSync(`${siteDir}/public`);
 
+    const outOfRootToMainComponent = path.relative(tempDir.name, rootDir);
+
     console.log();
     console.log(
         gray(' ◳ ◲ ◱ ◰ '),
@@ -121,11 +125,16 @@ export async function cli(argv:object) {
     console.log();
     console.log();
     console.log();
+    
+    
 
     console.log(ENTRY)
     // make the entry one way for both watch and compile modes.
     //createFile(`${siteDir}/public/_entry.js`, mainJS(ENTRY));
-    createFile(`${siteDir}/public/_entry.js`, mainJS(`${rootDir}/${ENTRY}`));
+    console.log(`${rootDir}/${ENTRY}`);
+    //createFile(`${siteDir}/public/_entry.js`, mainJS(`${rootDir}/${ENTRY}`));
+    console.log(outOfRootToMainComponent);
+    createFile(`${siteDir}/public/_entry.js`, mainJS(`./${outOfRootToMainComponent}/${componentName}`));
 
     if (mode === 'watch' || mode === 'build') {
         let cssFile;
@@ -151,7 +160,8 @@ export async function cli(argv:object) {
         */
 
 
-        const plugins = [resolveRemoteDependencies(), svelte()];
+        //const plugins = [resolveRemoteDependencies(), svelte()];
+        const plugins = [svelte(), cdn("skypack")];
 
         // const plugins = [['@snowpack/plugin-svelte']];
         // if (mode === 'build') {
@@ -183,6 +193,8 @@ export async function cli(argv:object) {
         //     root: __dirname,
         // });
         
+        console.log(ENTRY);
+        
         const config = {
             mode: "development",
             root: siteDir,
@@ -190,7 +202,12 @@ export async function cli(argv:object) {
             publicDir: `${siteDir}/public/`,
             server: {
                 port: 8042
-            }
+            },
+            // resolve: {
+            //     alias: {
+            //         [`./mount/${ENTRY}`]: `/${ENTRY}`//`${rootDir}/`: '/'
+            //     }
+            // }
         };
 
         console.log(
@@ -201,6 +218,7 @@ export async function cli(argv:object) {
         
         if (mode === 'watch') {
             //open('http://localhost:8042');
+            // @ts-ignore
             const server = await createServer({ configFile: false, ...config });
             await server.listen();
         } else if (mode === 'build') {

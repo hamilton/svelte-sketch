@@ -1,5 +1,5 @@
 export const mainJS = (file:string) => `
-import App from '${file}';
+import App from './mount/${file}';
 
 const app = new App({
 	target: document.body,
