@@ -18,7 +18,6 @@ import { fileURLToPath } from 'url';
 import { createServer } from "vite";
 
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
-import fancyHeader from "./fancy-header";
 
 export async function cli(argv:object) {
     // @ts-ignore
@@ -37,7 +36,7 @@ export async function cli(argv:object) {
         .option("css <stylesheets>", {type: "array", describe: "path(s) to global stylesheets to append to entrypoint"})
         .help();
 
-    const ENTRY = args.argv.component;
+    const entryComponent = args.argv.component;
     const mode = args.argv._[0];
 
     if (mode === 'bundle') {
@@ -50,12 +49,10 @@ export async function cli(argv:object) {
         process.exit();
     }
 
-    if (!ENTRY) {
+    if (!entryComponent) {
         console.error("the entrypoint must be listed");
         process.exit();
     }
-
-    fancyHeader();
 
     function getDirectory(file:string) {
         return file.split('/').slice(0, -1).join('/');
@@ -73,35 +70,38 @@ export async function cli(argv:object) {
         fs.writeFileSync(path, content);
     }
 
-    const fullPath = path.resolve(ENTRY);
-    const componentName = getFilename(ENTRY);
-    const rootDir = getDirectory(fullPath);
+    // resolve?
+    const entryComponentPath = path.resolve(entryComponent);
+    const entryComponentName = getFilename(entryComponent);
+    const entryComponentDir = getDirectory(entryComponentPath);
     const tempDirObj = setupTemporaryDir();
     const tempDir = tempDirObj.name;
+
+    const rootServerPath = (filename:string) => `${tempDir}/${filename}`;
+    const staticAssetPath = (filename:string) => rootServerPath(`public/${filename}`);
+    
     fs.mkdirSync(`${tempDir}/public`);
 
-    const outOfRootToMainComponent = path.relative(tempDir, rootDir);
+    console.log(green("Skit"));
 
     console.log();
     console.log(
-        gray(' ◳ ◲ ◱ ◰ '),
         "entrypoint",
-        bold().underline().green(componentName),
+        bold().underline().green(entryComponentName),
         "from",
-        green(`${fullPath.split('/').slice(0, -1).join('/')}/`)
-    )
+        green(`${entryComponentDir}/`)
+    );
     
     if (args.argv.css) {
         const _cssPath = path.resolve(args.argv.css[0]).split("/");
         const _cssTo = _cssPath.slice(0, -1).join('/');
         const _cssF = _cssPath.slice(-1)[0];
         console.log(
-            gray(" ◴ ◵ ◶ ◷ "),
             'stylesheet',
             bold().underline().green(_cssF),
             'from',
             green(_cssTo + "/")
-        )
+        );
     }
     console.log(
         gray(' ◭ ◬ △ ◮ '),
@@ -110,10 +110,9 @@ export async function cli(argv:object) {
     );
     console.log();
     console.log();
-    console.log();
-    
-    createFile(`${tempDir}/public/_entry.js`, mainJS(`${rootDir}/${componentName}`));
+    createFile(staticAssetPath(`_entry.js`), mainJS(entryComponentPath));
 
+    /** add all mentioned css files here. */
     if (mode === 'watch' || mode === 'build') {
         let cssFile;
         if (args.argv.css) {
@@ -122,49 +121,45 @@ export async function cli(argv:object) {
 
         if (cssFile) {
             const fileContents = fs.readFileSync(path.resolve(cssFile)).toString();
-            createFile(`${tempDir}/public/${getFilename(cssFile)}`, fileContents);
+            createFile(staticAssetPath(getFilename(cssFile)), fileContents);
         } else {
-            createFile(`${tempDir}/public/global.css`, globalCSS);
+            createFile(staticAssetPath("global.css"), globalCSS);
         }
-        createFile(`${tempDir}/index.html`, indexHTML({
+        createFile(rootServerPath('index.html'), indexHTML({
             css: cssFile ? getFilename(cssFile) : undefined,
-            title: componentName
+            title: entryComponentName
         }));
 
-        createFile(`${tempDir}/public/favicon.svg`, favicon);
+        createFile(staticAssetPath("favicon.svg"), favicon);
 
-        const plugins = [svelte(), cdn("skypack")];
+        const plugins:any[] = [svelte(), cdn("skypack")];
         
         const config = {
-            mode: "development",
+            mode: mode === 'watch' ? "development" : "production",
             root: tempDir,
             plugins,
-            publicDir: `${tempDir}/public/`,
+            publicDir: rootServerPath('public/'),
             server: {
-                port: 8042
-            },
+                port: 8042,
+                fs: {
+                    allow: [entryComponentDir]
+                  }
+            }
         };
-
-        console.log(
-            gray(' ◭ ◬ △ ◮ '),
-            `Project Root`,
-            green(config.root)
-        );
         
         if (mode === 'watch') {
-            //open('http://localhost:8042');
-            // @ts-ignore
-            const server = await createServer({ configFile: false, ...config });
+            open('http://localhost:8042');
+            const server = await createServer(config);
             await server.listen();
         } else if (mode === 'build') {
-           console.log("Building is not quite supported yet. Check back in a future release.")
-           console.log();
-            //await build({ config });
+            console.log();
+            console.log("Building is not yet supported. Check back soon!");
+            console.log();
         }
     }
 
     function byebye() {
-        fs.unlinkSync(`${rootDir}/_entry.js`);
+        fs.unlinkSync(`${entryComponentDir}/_entry.js`);
         tempDirObj.removeCallback();
         process.exit();
     }
