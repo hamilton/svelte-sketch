@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-// @ts-ignore
 import yargs from "yargs";
-// @ts-ignore
 import * as helpers from "yargs/helpers";
 import path from "path";
 import fs from "fs";
@@ -11,15 +9,16 @@ import open from "open";
 import { bold, gray, green } from 'kleur';
 
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-// @ts-ignore
 import cdn from './plugin-cdn';
+
+import { rollup } from "rollup";
 
 import { fileURLToPath } from 'url';
 import { createServer } from "vite";
 
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
 
-export async function cli(argv:object) {
+export async function cli(argv:string[]) {
     // @ts-ignore
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,8 +34,11 @@ export async function cli(argv:object) {
         .array("css")
         .option("css <stylesheets>", {type: "array", describe: "path(s) to global stylesheets to append to entrypoint"})
         .help();
-
+    
+    console.log(args)
+    // @ts-ignore
     const entryComponent = args.argv.component;
+    // @ts-ignore
     const mode = args.argv._[0];
 
     if (mode === 'bundle') {
@@ -70,7 +72,6 @@ export async function cli(argv:object) {
         fs.writeFileSync(path, content);
     }
 
-    // resolve?
     const entryComponentPath = path.resolve(entryComponent);
     const entryComponentName = getFilename(entryComponent);
     const entryComponentDir = getDirectory(entryComponentPath);
