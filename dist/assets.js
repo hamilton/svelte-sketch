@@ -11,7 +11,7 @@ const app = new App({
 export default app;`;
 exports.mainJS = mainJS;
 const indexHTML = ({ css, title }) => {
-    const defaultArguments = { css: undefined, title: "Svignette" };
+    const defaultArguments = { css: undefined, title: "svelte-sketch" };
     const combinedArguments = { ...defaultArguments, css, title };
     let stylesheet;
     if (defaultArguments.css) {

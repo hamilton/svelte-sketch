@@ -2,22 +2,19 @@
   "name": "svelte-sketch",
   "version": "0.1.0",
   "description": "Develop any Svelte component on your filesystem as an interactive REPL",
-  "main": "src/cli.js",
+  "main": "dist/cli.js",
   "bin": {
     "svelte-sketch": "bin/svelte-sketch",
     "@hamilton/svelte-sketch": "bin/svelte-sketch"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "rollup -c -w",
-    "build": "tsc",
-    "start": "sirv _site"
+    "build": "tsc"
   },
   "publishConfig": {
     "access": "public"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Hamilton Ulmer",
+  "license": "MPL-2.0",
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.24",
     "@types/tmp": "^0.2.1",
@@ -40,8 +37,6 @@
     "node-fetch": "^2.6.2",
     "open": "^8.2.1",
     "rollup-plugin-svelte": "^7.1.0",
-    "svelte-hmr": "^0.14.7",
-    "tmp": "^0.2.1",
-    "tsc-prog": "^2.2.1"
+    "tmp": "^0.2.1"
   }
 }
