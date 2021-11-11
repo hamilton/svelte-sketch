@@ -1,0 +1,4 @@
+#!/usr/bin/env node --trace-warnings
+
+require = require("esm")(module /*, options*/);
+require("../dist/cli").cli(process.argv);
