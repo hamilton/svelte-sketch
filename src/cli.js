@@ -11,15 +11,11 @@ import { bold, gray, green } from "kleur";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import cdn from "./plugin-cdn";
 
-import { fileURLToPath } from "url";
 import { createServer } from "vite";
 
 import { mainJS, indexHTML, globalCSS, favicon } from "./assets";
 
 export async function cli(argv) {
-  // @ts-ignore
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
   const args = yargs(hideBin(argv))
     .command(
       "watch <component>",
