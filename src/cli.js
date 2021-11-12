@@ -51,7 +51,7 @@ export async function cli(argv) {
       describe: "port number (default 8080)",
     })
     .help();
-
+  console.log(argv);
   const parsedOptions = args.argv;
   // @ts-ignore
   const entryComponent = parsedOptions.component;
