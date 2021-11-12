@@ -1,4 +1,18 @@
 #!/usr/bin/env node --trace-warnings
 
+const tsc = require("tsc-prog");
+
+tsc.build({
+  basePath: __dirname, // always required, used for relative paths
+  configFilePath: "tsconfig.json", // config to inherit from (optional)
+  compilerOptions: {
+    rootDir: "src",
+    outDir: "dist",
+    declaration: true,
+    skipLibCheck: true,
+  },
+  include: ["src/**/*"],
+});
+
 require = require("esm")(module /*, options*/);
 require("../dist/cli").cli(process.argv);
