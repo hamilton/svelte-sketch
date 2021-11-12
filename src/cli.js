@@ -11,11 +11,6 @@ import { bold, gray, green } from "kleur";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import cdn from "./plugin-cdn";
 
-import { watch } from "rollup";
-import rollupSvelte from "rollup-plugin-svelte";
-import resolve from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-
 import { fileURLToPath } from "url";
 import { createServer } from "vite";
 
@@ -52,13 +47,9 @@ export async function cli(argv) {
       describe: "port number (default 8080)",
     })
     .help();
-  console.log(argv);
   const parsedOptions = args.argv;
-  // @ts-ignore
   const entryComponent = parsedOptions.component;
-  // @ts-ignore
   const mode = parsedOptions._[0];
-  // @ts-ignore
   const port = parsedOptions.port || 8042;
 
   if (mode === "bundle") {
@@ -176,17 +167,7 @@ export async function cli(argv) {
       const server = await createServer(config);
       await server.listen();
     } else if (mode === "build") {
-      const f = fs.readFileSync(staticAssetPath("_entry.js")).toString();
-      console.log(commonjs, rollupSvelte, resolve);
-      const bundle = await watch({
-        input: staticAssetPath("_entry.js"),
-        plugins: [rollupSvelte(), resolve({ browser: true }), commonjs()],
-        onwarn: (msg) => {
-          console.log();
-          console.log(msg);
-          console.log();
-        },
-      });
+      // FIXME
     }
   }
 
