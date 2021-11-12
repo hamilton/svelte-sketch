@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 import path from "path";
 import fs from "fs";
 import tmp from "tmp";
@@ -24,7 +25,7 @@ export async function cli(argv) {
   // @ts-ignore
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-  const args = yargs(argv.slice(1))
+  const args = yargs(hideBin(argv))
     .command(
       "watch <component>",
       "watch component for changes and serve on 8080",
