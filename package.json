@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "description": "Develop any Svelte component on your filesystem as an interactive REPL",
   "main": "dist/cli.js",
-  "bin": {
-    "svelte-sketch": "bin/svelte-sketch",
-    "@hamilton/svelte-sketch": "bin/svelte-sketch"
-  },
+  "bin": "bin/svelte-sketch",
   "scripts": {
     "build": "tsc"
   },
