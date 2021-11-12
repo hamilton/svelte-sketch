@@ -74,7 +74,7 @@ export async function cli(argv) {
   function setupTemporaryDir() {
     return tmp.dirSync({
       mode: 0o777,
-      prefix: "protosvelte",
+      prefix: "svelte-sketch",
       unsafeCleanup: true,
     });
   }
@@ -94,7 +94,7 @@ export async function cli(argv) {
 
   fs.mkdirSync(`${tempDir}/public`);
 
-  console.log(green("Protosvelte"));
+  console.log(green("svelte-sketch"));
 
   console.log();
   console.log(
