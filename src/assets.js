@@ -1,27 +1,22 @@
-export const mainJS = (file:string) => `
+export const mainJS = (file) => `
 import App from '${file}';
 
 const app = new App({
 	target: document.body,
 });
 
-export default app;`
+export default app;`;
 
-interface htmlArguments {
-	css: string | undefined,
-	title: string
-}
-
-export const indexHTML = ({css, title} : htmlArguments) => {
-	const defaultArguments = {css: undefined, title: "svelte-sketch"};
-	const combinedArguments = {...defaultArguments, css, title};
-	let stylesheet;
-	if (defaultArguments.css) {
-		stylesheet = `<link rel='stylesheet' href='/${css}'></link>`
-	} else {
-		stylesheet = `<link rel='stylesheet' href='/global.css'>`
-	}
-	return `<!DOCTYPE html>
+export const indexHTML = ({ css, title }) => {
+  const defaultArguments = { css: undefined, title: "svelte-sketch" };
+  const combinedArguments = { ...defaultArguments, css, title };
+  let stylesheet;
+  if (defaultArguments.css) {
+    stylesheet = `<link rel='stylesheet' href='/${css}'></link>`;
+  } else {
+    stylesheet = `<link rel='stylesheet' href='/global.css'>`;
+  }
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset='utf-8'>
@@ -38,7 +33,8 @@ export const indexHTML = ({css, title} : htmlArguments) => {
 <body>
 </body>
 </html>
-`};
+`;
+};
 
 export const globalCSS = `
 html, body {
@@ -104,7 +100,7 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
-`
+`;
 
 export const favicon = `
 <svg viewBox="0 0 380 380" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
@@ -121,4 +117,4 @@ export const favicon = `
     </g>
 </svg>
 
-`
+`;
