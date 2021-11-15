@@ -96,11 +96,13 @@ export async function cli(argv) {
   console.log(green("svelte-sketch"));
   console.log();
   console.log(
+    gray(" ▤ ▥ ▦ ▣ "),
     "entrypoint",
     bold().underline().green(entryComponentName),
     "from",
     green(`${entryComponentDir}/`)
   );
+  console.log();
 
   if (parsedOptions.css) {
     const _cssPath = path.resolve(parsedOptions.css[0]).split("/");
