@@ -5,7 +5,6 @@ import { hideBin } from "yargs/helpers";
 import path from "path";
 import fs from "fs";
 import tmp from "tmp";
-import open from "open";
 import { bold, gray, green } from "kleur";
 
 import { svelte } from "@sveltejs/vite-plugin-svelte";
@@ -95,7 +94,6 @@ export async function cli(argv) {
   fs.mkdirSync(`${tempDir}/public`);
 
   console.log(green("svelte-sketch"));
-
   console.log();
   console.log(
     "entrypoint",
@@ -159,7 +157,6 @@ export async function cli(argv) {
     };
 
     if (mode === "watch") {
-      open(`http://localhost:${port}`);
       const server = await createServer(config);
       await server.listen();
     } else if (mode === "build") {
