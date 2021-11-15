@@ -94,7 +94,8 @@ export async function cli(argv) {
   fs.mkdirSync(`${tempDir}/public`);
 
   console.log(green("svelte-sketch"));
-
+  console.log();
+  console.log(green(`serving at`), `http://localhost:${port}`);
   console.log();
   console.log(
     "entrypoint",
