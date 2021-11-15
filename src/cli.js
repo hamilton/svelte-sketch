@@ -115,6 +115,11 @@ export async function cli(argv) {
   }
   console.log(gray(" ◭ ◬ △ ◮ "), `Server root for repl`, green(tempDir));
   console.log();
+  console.log(
+    gray(" ◴ ◵ ◶ ◷ "),
+    `Serving at`,
+    green(`http://localhost:${port}`)
+  );
   console.log();
   createFile(staticAssetPath(`_entry.js`), mainJS(entryComponentPath));
 
