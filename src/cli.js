@@ -5,7 +5,6 @@ import { hideBin } from "yargs/helpers";
 import path from "path";
 import fs from "fs";
 import tmp from "tmp";
-import terminalLink from "terminal-link";
 import { bold, gray, green } from "kleur";
 
 import { svelte } from "@sveltejs/vite-plugin-svelte";
@@ -95,18 +94,13 @@ export async function cli(argv) {
   fs.mkdirSync(`${tempDir}/public`);
 
   console.log(green("svelte-sketch"));
+  console.log();
   console.log(
     "entrypoint",
     bold().underline().green(entryComponentName),
     "from",
     green(`${entryComponentDir}/`)
   );
-  console.log();
-  console.log(
-    green(`serving at`),
-    terminalLink(`http://localhost:${port}`, `http://localhost:${port}`)
-  );
-  console.log();
 
   if (parsedOptions.css) {
     const _cssPath = path.resolve(parsedOptions.css[0]).split("/");

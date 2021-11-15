@@ -23,7 +23,6 @@
     "rollup-plugin-svelte": "^7.1.0",
     "sirv-cli": "^1.0.11",
     "svelte": "^3.38.3",
-    "terminal-link": "^3.0.0",
     "tmp": "^0.2.1",
     "typescript": "^4.4.3",
     "vite": "^2.5.7",
